@@ -1,2 +1,5 @@
-# Spaced
-A node-based reverb plugin
+![SplashScreen](Resources/Spaced.png)
+
+### Overview:
+
+Spaced is a node-based reverb plugin.
