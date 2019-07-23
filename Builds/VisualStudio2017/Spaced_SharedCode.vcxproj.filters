@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Spaced\Resources">
+      <UniqueIdentifier>{19DBF99E-721E-FC11-26D9-3CEF1AF34EBF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Spaced\Source">
       <UniqueIdentifier>{4BEC2B52-AC71-2CA6-8718-6EE5E8ACA44C}</UniqueIdentifier>
     </Filter>
@@ -433,6 +436,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Node.cpp">
+      <Filter>Spaced\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp">
       <Filter>Spaced\Source</Filter>
     </ClCompile>
@@ -2374,6 +2380,9 @@
     <ClCompile Include="..\..\..\..\..\..\..\..\SDKs\JUCE\modules\juce_opengl\juce_opengl.mm">
       <Filter>JUCE Modules\juce_opengl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2418,6 +2427,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Node.h">
+      <Filter>Spaced\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\PluginProcessor.h">
       <Filter>Spaced\Source</Filter>
     </ClInclude>
@@ -4617,11 +4629,17 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Resources\Roboto-Thin.ttf">
+      <Filter>Spaced\Resources</Filter>
+    </None>
     <None Include="..\..\..\..\..\..\..\..\SDKs\JUCE\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">
       <Filter>JUCE Modules\juce_audio_formats\codecs\flac</Filter>
     </None>

@@ -2,7 +2,12 @@
 
 <JUCERPROJECT id="peW9wf" name="Spaced" projectType="audioplug" jucerVersion="5.4.3">
   <MAINGROUP id="T5ziKg" name="Spaced">
+    <GROUP id="{86E1756F-0B85-AEFC-DFCC-2475FA1A91CB}" name="Resources">
+      <FILE id="EecUtf" name="Roboto-Thin.ttf" compile="0" resource="1" file="Resources/Roboto-Thin.ttf"/>
+    </GROUP>
     <GROUP id="{CEAC800E-EF4D-245C-1E4F-B95AF1CD52EC}" name="Source">
+      <FILE id="y1BYSw" name="Node.cpp" compile="1" resource="0" file="Source/Node.cpp"/>
+      <FILE id="MovWuW" name="Node.h" compile="0" resource="0" file="Source/Node.h"/>
       <FILE id="aQ5J1j" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="ChPGmM" name="PluginProcessor.h" compile="0" resource="0"
