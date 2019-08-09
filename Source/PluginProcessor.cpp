@@ -21,9 +21,36 @@ SpacedAudioProcessor::SpacedAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+	parameters(*this, nullptr, Identifier("Reverb"),
+		{
+			std::make_unique<AudioParameterFloat>("roomSize",
+												  "Room Size",
+												  0,
+												  1,
+												  0.5),
+			std::make_unique<AudioParameterFloat>("mix",
+												  "Mix",
+												  0,
+												  1,
+												  0.5),
+			std::make_unique<AudioParameterFloat>("width",
+												  "Width",
+												  0,
+												  1,
+												  0.5),
+			std::make_unique<AudioParameterFloat>("damping",
+												  "Damping",
+												  0,
+												  1,
+												  0.5)
+		})
 #endif
 {
+	roomSize = parameters.getRawParameterValue("roomSize");
+	mix = parameters.getRawParameterValue("mix");
+	width = parameters.getRawParameterValue("width");
+	damping = parameters.getRawParameterValue("damping");
 }
 
 SpacedAudioProcessor::~SpacedAudioProcessor()
@@ -95,8 +122,8 @@ void SpacedAudioProcessor::changeProgramName (int index, const String& newName)
 //==============================================================================
 void SpacedAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+	reverb.setSampleRate(sampleRate);
+	reverb.setParameters(reverbParameters);
 }
 
 void SpacedAudioProcessor::releaseResources()
@@ -135,26 +162,28 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+	reverbParameters.roomSize = *roomSize;
+	reverbParameters.width = *width;
+	reverbParameters.damping = *damping;
+	reverbParameters.dryLevel = 1 - *mix;
+	reverbParameters.wetLevel = *mix;
+
+	reverb.setParameters(reverbParameters);
+
+	if (totalNumInputChannels == 1)
+		reverb.processMono(buffer.getWritePointer(0), buffer.getNumSamples());
+	
+	else
+		reverb.processStereo(buffer.getWritePointer(0), buffer.getWritePointer(1), buffer.getNumSamples());
+	
+	
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+		
     }
 }
 

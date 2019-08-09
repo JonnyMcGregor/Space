@@ -29,13 +29,8 @@ void Node::drawNode(Graphics& g)
 	gradientArea = Rectangle<float>(xPos - diameter, yPos - diameter, diameter * 2, diameter * 2);
 	Point<float> endOfGradient = Point<float>(gradientArea.getX() + nodeArea.getWidth(), gradientArea.getY());
 	ColourGradient gradient = ColourGradient(nodeColour, nodeArea.getCentre(), Colours::transparentWhite, endOfGradient, true);
-
-	if (isDelayNode)
-		g.setColour(nodeColour);
-
-	else
-		g.setColour(Colours::white);
-
+	
+	g.setColour(nodeColour);
 	g.drawEllipse(nodeArea, 2.0f);
 	g.setGradientFill(gradient);
 	g.fillEllipse(gradientArea);
