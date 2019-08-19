@@ -29,6 +29,7 @@ public:
 	void resized() override;
 	void paint (Graphics&) override;
 
+    void drawDryWetLine(Graphics&);
 	void drawStaticUIElements(Graphics&);
 	void drawNodeConnectorLines(Graphics&, int iterator);
     void drawFinalNodeConnectorLine(Graphics&);
@@ -71,13 +72,18 @@ private:
     float nodeFieldHeightOnMouseDown = 0;
     float nodeFieldRightOnMouseDown = 0;
     float nodeFieldBottomOnMouseDown = 0;
-	Node *selectedNode = nullptr;
+	
+    Node *selectedNode = nullptr;
 	int selectedNodeIndex = 0;
 
 	float roomSize = 0;
 	float mix = 0;
 	float pan = 0;
-
+    
+    bool startPath = true;
+    Path waveform;
+    Path waveform2;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpacedAudioProcessorEditor)
 };
 

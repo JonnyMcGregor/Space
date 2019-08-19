@@ -24,14 +24,14 @@ SpacedAudioProcessorEditor::SpacedAudioProcessorEditor (SpacedAudioProcessor& p)
 	smallFont.setHeight(15);
     smallFont.setExtraKerningFactor(0.125);
 	
-    processor.reverbNode.setXPosition(processor.nodeField.getCentreX());
-	processor.reverbNode.setYPosition(processor.nodeField.getCentreY());
-
 	
     if(processor.isFirstTimeOpeningEditor)
     {
         processor.nodeField = Rectangle<float>(proportionOfWidth(0.1f), proportionOfHeight(0.15f), proportionOfWidth(0.35f), proportionOfHeight(0.417f));
-        
+       
+        processor.reverbNode.setXPosition(processor.nodeField.getCentreX());
+        processor.reverbNode.setYPosition(processor.nodeField.getCentreY());
+
         processor.roomSizeNodes.push_back(Node(processor.nodeField.getX(), processor.nodeField.getY(), initialNodeWidth,
             nodePink, backgroundColour));
         processor.roomSizeNodes.push_back(Node(processor.nodeField.getX(), processor.nodeField.getBottom(), initialNodeWidth,
@@ -66,6 +66,8 @@ void SpacedAudioProcessorEditor::paint (Graphics& g)
 	
     processor.reverbNode.drawNode(g);
     
+    drawDryWetLine(g);
+    
 	for (int i = 0; i < processor.roomSizeNodes.size(); i++)
 	{
 		processor.roomSizeNodes[i].drawNode(g);
@@ -84,18 +86,33 @@ void SpacedAudioProcessorEditor::paint (Graphics& g)
 
 }
 
-void SpacedAudioProcessorEditor::drawStaticUIElements(Graphics& g)
+void SpacedAudioProcessorEditor::drawDryWetLine(Graphics& g)
 {
-	Rectangle<float> titleFontArea = Rectangle<float>(0.0f, proportionOfHeight(0.666f), (float)getWidth(), proportionOfHeight(0.333f));
-	g.setColour(textColour);
-	g.setFont(largeFont);
-	g.drawText("space.", titleFontArea, Justification::centred);
-    
-    g.setFont(smallFont);
-    g.drawText("L", processor.roomSizeNodes[1].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
-    g.drawText("R", processor.roomSizeNodes[2].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
-    g.drawText("wet", processor.nodeField.getX(), processor.nodeField.getY(), processor.nodeField.getWidth(), 40, Justification::centred);
-    g.drawText("dry", processor.nodeField.getX(), processor.nodeField.getBottom() - 40, processor.nodeField.getWidth(), 40, Justification::centred);
+   
+    for (int i = 1; i <= processor.nodeField.getWidth(); i++)
+    {
+        //Starts the waveform paths in the correct place
+        if(startPath == true)
+        {
+            waveform.startNewSubPath(processor.nodeField.getX(), processor.reverbNode.getYPosition());
+            waveform2.startNewSubPath(processor.reverbNode.getXPosition() + processor.reverbNode.getRadius(), processor.reverbNode.getYPosition());
+            startPath = false; //is set to true each time mouse event occurs. - see mouseDown()
+        }
+        
+        if(processor.nodeField.getX() + i > (processor.reverbNode.getXPosition() + processor.reverbNode.getRadius()))
+        {
+            float yValue = 8 * sin(MathConstants<float>::twoPi * i * 0.010) + processor.reverbNode.getYPosition();
+            waveform2.lineTo(processor.nodeField.getX() + i, yValue);
+        }
+        
+        else if(processor.nodeField.getX() + i < processor.reverbNode.getXPosition() - processor.reverbNode.getRadius())
+        {
+            int yValue = 8 * sin(MathConstants<float>::twoPi * i * 0.010) + processor.reverbNode.getYPosition();
+            waveform.lineTo(processor.nodeField.getX() + i, yValue);
+        }
+    }
+    g.strokePath(waveform, PathStrokeType(2.0f));
+    g.strokePath(waveform2, PathStrokeType(2.0f));
 
 }
 
@@ -111,6 +128,32 @@ void SpacedAudioProcessorEditor::drawFinalNodeConnectorLine(Graphics &g)
 {
      Line<float> nodeConnector = Line<float>(processor.roomSizeNodes.back().getXPosition(), processor.roomSizeNodes.back().getYPosition(), processor.roomSizeNodes[0].getXPosition(), processor.roomSizeNodes[0].getYPosition());
      g.drawLine(nodeConnector, 2);
+}
+
+void SpacedAudioProcessorEditor::drawStaticUIElements(Graphics& g)
+{
+    Rectangle<float> titleFontArea = Rectangle<float>(0.0f, proportionOfHeight(0.666f), (float)getWidth(), proportionOfHeight(0.333f));
+    Line<float> arrowLine1 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10, processor.nodeField.getRight() + 25, processor.nodeField.getY() + 10);
+    Line<float> arrowLine2 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getX() + 10, processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10);
+    g.setColour(textColour);
+    g.setFont(largeFont);
+    g.drawText("space.", titleFontArea, Justification::centred);
+    
+    g.setFont(smallFont);
+    g.drawText("L", processor.roomSizeNodes[1].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
+    g.drawText("R", processor.roomSizeNodes[2].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
+    g.drawText("wet", processor.nodeField.getX(), processor.nodeField.getY(), processor.nodeField.getWidth(), 40, Justification::centred);
+    g.drawText("dry", processor.nodeField.getX(), processor.nodeField.getBottom() - 40, processor.nodeField.getWidth(), 40, Justification::centred);
+    
+    g.drawArrow(arrowLine1, 1.0f, 4.0f, 10.0f);
+    g.drawArrow(arrowLine2, 1.0f, 4.0f, 10.0f);
+
+    g.addTransform(AffineTransform::rotation(-MathConstants<float>::halfPi, processor.nodeField.getRight(), processor.nodeField.getBottom()));
+    
+    g.drawText("room size", processor.nodeField.getRight(), processor.nodeField.getBottom(), processor.nodeField.getHeight(), 100, Justification::centred);
+    
+    g.addTransform(AffineTransform::rotation(MathConstants<float>::halfPi, processor.nodeField.getRight(), processor.nodeField.getBottom()));
+    
 }
 
 void SpacedAudioProcessorEditor::drawBorderOnSelectedNode(Graphics& g, Node selectedNode)
@@ -131,12 +174,19 @@ void SpacedAudioProcessorEditor::drawBorderOnSelectedNode(Graphics& g, Node sele
 //==============================================================================
 void SpacedAudioProcessorEditor::mouseDown(const MouseEvent & m)
 {
+    selectNodeForMovement(m);
+    
+    waveform.clear();
+    waveform2.clear();
+    startPath = true;
+    
     nodeFieldWidthOnMouseDown = processor.nodeField.getWidth();
     nodeFieldHeightOnMouseDown = processor.nodeField.getHeight();
     nodeFieldXOnMouseDown = processor.nodeField.getX();
     nodeFieldYOnMouseDown = processor.nodeField.getY();
     nodeFieldRightOnMouseDown = processor.nodeField.getRight();
     nodeFieldBottomOnMouseDown = processor.nodeField.getBottom();
+    repaint();
 }
 
 void SpacedAudioProcessorEditor::mouseDrag(const MouseEvent& m)
@@ -144,6 +194,9 @@ void SpacedAudioProcessorEditor::mouseDrag(const MouseEvent& m)
     if(m.mouseWasDraggedSinceMouseDown())
     {
         selectNodeForMovement(m);
+        waveform.clear();
+        waveform2.clear();
+        startPath = true;
         if (selectedNode != nullptr)
         {
             if (selectedNode == &processor.reverbNode)

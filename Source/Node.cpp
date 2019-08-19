@@ -26,7 +26,7 @@ Node::~Node()
 
 void Node::drawNode(Graphics& g)
 {
-	nodeArea = Rectangle<float>(xPos - (diameter / 2), yPos - (diameter / 2), diameter, diameter);
+	nodeArea = Rectangle<float>(xPos - getRadius(), yPos - getRadius(), diameter, diameter);
 	gradientArea = Rectangle<float>(xPos - diameter, yPos - diameter, diameter * 2, diameter * 2);
 	Point<float> endOfGradient = Point<float>(gradientArea.getX() + nodeArea.getWidth(), gradientArea.getY());
 	ColourGradient gradient = ColourGradient(nodeColour, nodeArea.getCentre(), backgroundColour, endOfGradient, true);
