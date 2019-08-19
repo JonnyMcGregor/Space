@@ -13,7 +13,7 @@
 class Node
 {
 public:
-	Node(float xPosition, float yPosition, float nodeDiameter, Colour nodeColour);
+	Node(float xPosition, float yPosition, float nodeDiameter, Colour colourOfNode, Colour colourOfBckground);
 	~Node();
 	
 	void drawNode(Graphics& g);
@@ -28,10 +28,7 @@ public:
 	float getYPosition();
 	Colour getColour();
 
-	bool isDelayNode = false;
 	bool isSelectedForMovement = false;
-	bool isPanNode = false;
-	bool isTimeNode = false;
 
 	Rectangle<float> nodeArea;
 	Rectangle<float> gradientArea;
@@ -42,4 +39,5 @@ private:
 	float yPos = 0;
 
 	Colour nodeColour;
+    Colour backgroundColour;
 };

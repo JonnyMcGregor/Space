@@ -56,22 +56,25 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 	AudioProcessorValueTreeState parameters;
+    
+    bool isFirstTimeOpeningEditor = true;
 
-	Node reverbNode = Node(0, 0, 50, Colour::fromRGB(72, 181, 15));
-	std::vector<Node> filterNodes;
+    Rectangle<float> nodeField;
+    Node reverbNode = Node(0, 0, 30, Colour::fromRGB(60, 176, 247), Colour::fromRGB(33,33,33));
+	std::vector<Node> roomSizeNodes;
+    
 private:
 
 	Reverb reverb;
 
 	Reverb::Parameters reverbParameters;
 
-	
 
 	float *roomSize = 0;     /**< Room size, 0 to 1.0, where 1.0 is big, 0 is small. */
 	float *damping = 0;     /**< Damping, 0 to 1.0, where 0 is not damped, 1.0 is fully damped. */
 	float *mix = 0;     /**< Dry level, 0 to 1.0 */
 	float *width = 0;
-
+    float *pan = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpacedAudioProcessor)

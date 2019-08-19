@@ -24,26 +24,11 @@ SpacedAudioProcessor::SpacedAudioProcessor()
                        ),
 	parameters(*this, nullptr, Identifier("Reverb"),
 		{
-			std::make_unique<AudioParameterFloat>("roomSize",
-												  "Room Size",
-												  0,
-												  1,
-												  0.5),
-			std::make_unique<AudioParameterFloat>("mix",
-												  "Mix",
-												  0,
-												  1,
-												  0.5),
-			std::make_unique<AudioParameterFloat>("width",
-												  "Width",
-												  0,
-												  1,
-												  0.5),
-			std::make_unique<AudioParameterFloat>("damping",
-												  "Damping",
-												  0,
-												  1,
-												  0.5)
+			std::make_unique<AudioParameterFloat>("roomSize", "Room Size", 0, 1, 0.5),
+			std::make_unique<AudioParameterFloat>("mix", "Mix", 0, 1, 0.5),
+            std::make_unique<AudioParameterFloat>("pan", "Pan", 0, 1, 0.5),
+            std::make_unique<AudioParameterFloat>("width", "Width", 0, 1, 0.5),
+			std::make_unique<AudioParameterFloat>("damping", "Damping", 0, 1, 0.5)
 		})
 #endif
 {
@@ -51,6 +36,7 @@ SpacedAudioProcessor::SpacedAudioProcessor()
 	mix = parameters.getRawParameterValue("mix");
 	width = parameters.getRawParameterValue("width");
 	damping = parameters.getRawParameterValue("damping");
+    pan = parameters.getRawParameterValue("pan");
 }
 
 SpacedAudioProcessor::~SpacedAudioProcessor()
@@ -170,7 +156,7 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
 	reverbParameters.damping = *damping;
 	reverbParameters.dryLevel = 1 - *mix;
 	reverbParameters.wetLevel = *mix;
-
+    
 	reverb.setParameters(reverbParameters);
 
 	if (totalNumInputChannels == 1)
@@ -178,12 +164,15 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
 	
 	else
 		reverb.processStereo(buffer.getWritePointer(0), buffer.getWritePointer(1), buffer.getNumSamples());
-	
-	
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-		
+        for (int sample = 0; sample < buffer.getNumSamples(); sample++)
+        {
+            if (channel == 0)
+                buffer.setSample(channel, sample, buffer.getSample(channel, sample) * cos(*pan*MathConstants<float>::halfPi));
+            else
+                buffer.setSample(channel, sample, buffer.getSample(channel, sample) * sin(*pan*MathConstants<float>::halfPi));
+        }
     }
 }
 
@@ -204,12 +193,20 @@ void SpacedAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    auto state = parameters.copyState();
+    std::unique_ptr<XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void SpacedAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (parameters.state.getType()))
+            parameters.replaceState (ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================
