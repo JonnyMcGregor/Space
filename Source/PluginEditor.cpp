@@ -27,7 +27,7 @@ SpacedAudioProcessorEditor::SpacedAudioProcessorEditor (SpacedAudioProcessor& p)
 	
     if(processor.isFirstTimeOpeningEditor)
     {
-        processor.nodeField = Rectangle<float>(proportionOfWidth(0.1f), proportionOfHeight(0.15f), proportionOfWidth(0.35f), proportionOfHeight(0.417f));
+        processor.nodeField = Rectangle<float>(proportionOfWidth(0.5f) - (proportionOfWidth(0.35f)/2), proportionOfHeight(0.4f) - (proportionOfHeight(0.417f)/2), proportionOfWidth(0.35f), proportionOfHeight(0.417f));
        
         processor.reverbNode.setXPosition(processor.nodeField.getCentreX());
         processor.reverbNode.setYPosition(processor.nodeField.getCentreY());
@@ -47,10 +47,6 @@ SpacedAudioProcessorEditor::~SpacedAudioProcessorEditor()
 {
 }
 
-void SpacedAudioProcessorEditor::setUpAttachments()
-{
-
-}
 //==============================================================================
 void SpacedAudioProcessorEditor::resized()
 {
@@ -133,8 +129,10 @@ void SpacedAudioProcessorEditor::drawFinalNodeConnectorLine(Graphics &g)
 void SpacedAudioProcessorEditor::drawStaticUIElements(Graphics& g)
 {
     Rectangle<float> titleFontArea = Rectangle<float>(0.0f, proportionOfHeight(0.666f), (float)getWidth(), proportionOfHeight(0.333f));
+    
     Line<float> arrowLine1 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10, processor.nodeField.getRight() + 25, processor.nodeField.getY() + 10);
-    Line<float> arrowLine2 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getX() + 10, processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10);
+    Line<float> arrowLine2 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getY() + 10, processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10);
+   
     g.setColour(textColour);
     g.setFont(largeFont);
     g.drawText("space.", titleFontArea, Justification::centred);
@@ -271,7 +269,6 @@ void SpacedAudioProcessorEditor::updateRoomSizeUIElements(const MouseEvent &m)
         processor.roomSizeNodes[3].setYPosition(processor.nodeField.getY());
     }
 }
-
 
 void SpacedAudioProcessorEditor::keepNodeInField(float &newX, float &newY, Node selectedNode)
 {

@@ -23,8 +23,6 @@ public:
     SpacedAudioProcessorEditor (SpacedAudioProcessor&);
     ~SpacedAudioProcessorEditor();
 
-	void setUpAttachments();
-
     //==============================================================================
 	void resized() override;
 	void paint (Graphics&) override;
