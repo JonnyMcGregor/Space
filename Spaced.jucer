@@ -3,7 +3,7 @@
 <JUCERPROJECT id="peW9wf" name="Space" projectType="audioplug" jucerVersion="5.4.4"
               pluginFormats="buildAU,buildStandalone,buildVST,buildVST3" pluginManufacturer="J. McGregor"
               pluginManufacturerCode="JUNI" pluginVST3Category="Reverb" pluginRTASCategory="8"
-              pluginVSTCategory="kPlugCategRoomFx" pluginCode="Spce">
+              pluginVSTCategory="kPlugCategRoomFx" pluginCode="SPCE">
   <MAINGROUP id="T5ziKg" name="Space">
     <GROUP id="{86E1756F-0B85-AEFC-DFCC-2475FA1A91CB}" name="Resources">
       <FILE id="EecUtf" name="Roboto-Thin.ttf" compile="0" resource="1" file="Resources/Roboto-Thin.ttf"/>
