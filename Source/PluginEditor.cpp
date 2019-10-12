@@ -40,6 +40,11 @@ SpacedAudioProcessorEditor::SpacedAudioProcessorEditor (SpacedAudioProcessor& p)
         processor.roomSizeNodes.push_back(Node(processor.nodeField.getRight(), processor.nodeField.getY(), initialNodeWidth, nodePink, backgroundColour));
         
         processor.isFirstTimeOpeningEditor = false;
+        
+        updateMixParameter();
+        updatePanParameter();
+        updateWidthParameter();
+        updateRoomSizeParameter();
     }
 }
 
@@ -237,6 +242,7 @@ void SpacedAudioProcessorEditor::mouseDrag(const MouseEvent& m)
             else
                 updateNodePosition(m, *selectedNode);
         }
+        
         repaint();
         updateRoomSizeParameter();
         updateMixParameter();
@@ -266,6 +272,7 @@ void SpacedAudioProcessorEditor::selectNodeForMovement(const MouseEvent &m)
 			}
 		}
 	}
+    
 }
 
 void SpacedAudioProcessorEditor::updateNodePosition(const MouseEvent &m, Node &selectedNode)
