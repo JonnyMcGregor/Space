@@ -24,11 +24,11 @@ SpacedAudioProcessor::SpacedAudioProcessor()
                        ),
 	parameters(*this, nullptr, Identifier("Reverb"),
 		{
-			std::make_unique<AudioParameterFloat>("roomSize", "Room Size", 0, 1, 0.5),
+			std::make_unique<AudioParameterFloat>("roomSize", "Room Length", 0, 1, 0.5),
 			std::make_unique<AudioParameterFloat>("mix", "Mix", 0, 1, 0.5),
-            std::make_unique<AudioParameterFloat>("pan", "Pan", 0, 1, 0.5),
-            std::make_unique<AudioParameterFloat>("width", "Width", 0, 1, 0.5),
-			std::make_unique<AudioParameterFloat>("damping", "Damping", 0, 1, 0.5)
+            std::make_unique<AudioParameterFloat>("width", "Room Width", 0, 1, 0.5),
+			std::make_unique<AudioParameterFloat>("damping", "Damping", 0, 1, 0.5),
+            std::make_unique<AudioParameterFloat>("pan", "Pan", 0, 1, 0.5)
 		})
 #endif
 {
@@ -110,6 +110,10 @@ void SpacedAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 {
 	reverb.setSampleRate(sampleRate);
 	reverb.setParameters(reverbParameters);
+    wetBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    dryBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    wetBuffer.clear();
+    dryBuffer.clear();
 }
 
 void SpacedAudioProcessor::releaseResources()
@@ -149,29 +153,44 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+    {
         buffer.clear (i, 0, buffer.getNumSamples());
+        wetBuffer.clear (i, 0, wetBuffer.getNumSamples());
+        dryBuffer.clear (i, 0, wetBuffer.getNumSamples());
 
+    }
+    
 	reverbParameters.roomSize = *roomSize;
 	reverbParameters.width = *width;
 	reverbParameters.damping = *damping;
-	reverbParameters.dryLevel = 1 - *mix;
-	reverbParameters.wetLevel = *mix;
+	reverbParameters.dryLevel = 0.0;
+	reverbParameters.wetLevel = 1.0;
     
 	reverb.setParameters(reverbParameters);
+    
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        wetBuffer.copyFrom(channel, 0, buffer.getReadPointer(channel), buffer.getNumSamples());
+        dryBuffer.copyFrom(channel, 0, buffer.getReadPointer(channel), buffer.getNumSamples());
+    }
+    
+    if (totalNumInputChannels == 1)
+        reverb.processMono(wetBuffer.getWritePointer(0), wetBuffer.getNumSamples());
 
-	if (totalNumInputChannels == 1)
-		reverb.processMono(buffer.getWritePointer(0), buffer.getNumSamples());
-	
-	else
-		reverb.processStereo(buffer.getWritePointer(0), buffer.getWritePointer(1), buffer.getNumSamples());
+    else
+        reverb.processStereo(wetBuffer.getWritePointer(0), wetBuffer.getWritePointer(1), wetBuffer.getNumSamples());
+
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         for (int sample = 0; sample < buffer.getNumSamples(); sample++)
         {
             if (channel == 0)
-                buffer.setSample(channel, sample, buffer.getSample(channel, sample) * cos(*pan*MathConstants<float>::halfPi));
+                dryBuffer.setSample(channel, sample, dryBuffer.getSample(channel, sample) * cos(*pan*MathConstants<float>::halfPi));
             else
-                buffer.setSample(channel, sample, buffer.getSample(channel, sample) * sin(*pan*MathConstants<float>::halfPi));
+                dryBuffer.setSample(channel, sample, dryBuffer.getSample(channel, sample) * sin(*pan*MathConstants<float>::halfPi));
+            
+            buffer.setSample(channel, sample, (dryBuffer.getSample(channel, sample) * (1 - *mix)) + (wetBuffer.getSample(channel, sample) * *mix));
+          
         }
     }
 }

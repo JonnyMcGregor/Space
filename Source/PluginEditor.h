@@ -28,7 +28,9 @@ public:
 	void paint (Graphics&) override;
 
     void drawDryWetLine(Graphics&);
-	void drawStaticUIElements(Graphics&);
+    void setDryWetLineStartPositions();
+    void setWaveformPath(Graphics&, int i);
+    void drawStaticUIElements(Graphics&);
 	void drawNodeConnectorLines(Graphics&, int iterator);
     void drawFinalNodeConnectorLine(Graphics&);
 	void drawBorderOnSelectedNode(Graphics& g, Node selectedNode);
@@ -39,12 +41,14 @@ public:
 	void selectNodeForMovement(const MouseEvent&);
 	void updateNodePosition(const MouseEvent&, Node&);
     void updateRoomSizeUIElements(const MouseEvent&);
+    void setNewRoomSizeValues(float& x, float& y, float& right, float& bottom, const MouseEvent&);
+
 	void keepNodeInField(float&, float&, Node selecedNode);
 
 	void updateRoomSizeParameter();
 	void updateMixParameter();
-	void updatePanParameter();
-
+	void updateWidthParameter();
+    void updatePanParameter();
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -76,11 +80,14 @@ private:
 
 	float roomSize = 0;
 	float mix = 0;
-	float pan = 0;
+	float width = 0;
+    float pan = 0;
+
+    Path waveformPathLeft;
+    Path waveformPathRight;
     
-    bool startPath = true;
-    Path waveform;
-    Path waveform2;
+    Node *previousNode = nullptr;
+    float previousMixValue, previousPanValue;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpacedAudioProcessorEditor)
 };

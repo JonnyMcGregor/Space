@@ -68,6 +68,9 @@ private:
 	Reverb reverb;
 
 	Reverb::Parameters reverbParameters;
+    
+    AudioBuffer<float> wetBuffer;
+    AudioBuffer<float> dryBuffer;
 
 
 	float *roomSize = 0;     /**< Room size, 0 to 1.0, where 1.0 is big, 0 is small. */

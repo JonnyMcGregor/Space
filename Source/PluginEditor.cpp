@@ -84,32 +84,59 @@ void SpacedAudioProcessorEditor::paint (Graphics& g)
 
 void SpacedAudioProcessorEditor::drawDryWetLine(Graphics& g)
 {
-   
+    waveformPathLeft.clear();
+    waveformPathRight.clear();
+    
+    setDryWetLineStartPositions();
     for (int i = 1; i <= processor.nodeField.getWidth(); i++)
     {
-        //Starts the waveform paths in the correct place
-        if(startPath == true)
-        {
-            waveform.startNewSubPath(processor.nodeField.getX(), processor.reverbNode.getYPosition());
-            waveform2.startNewSubPath(processor.reverbNode.getXPosition() + processor.reverbNode.getRadius(), processor.reverbNode.getYPosition());
-            startPath = false; //is set to true each time mouse event occurs. - see mouseDown()
-        }
-        
-        if(processor.nodeField.getX() + i > (processor.reverbNode.getXPosition() + processor.reverbNode.getRadius()))
-        {
-            float yValue = 8 * sin(MathConstants<float>::twoPi * i * 0.010) + processor.reverbNode.getYPosition();
-            waveform2.lineTo(processor.nodeField.getX() + i, yValue);
-        }
-        
-        else if(processor.nodeField.getX() + i < processor.reverbNode.getXPosition() - processor.reverbNode.getRadius())
-        {
-            int yValue = 8 * sin(MathConstants<float>::twoPi * i * 0.010) + processor.reverbNode.getYPosition();
-            waveform.lineTo(processor.nodeField.getX() + i, yValue);
-        }
+        setWaveformPath(g, i);
     }
-    g.strokePath(waveform, PathStrokeType(2.0f));
-    g.strokePath(waveform2, PathStrokeType(2.0f));
+    g.strokePath(waveformPathLeft, PathStrokeType(2.0f));
+    g.strokePath(waveformPathRight, PathStrokeType(2.0f));
 
+}
+void SpacedAudioProcessorEditor::setDryWetLineStartPositions()
+{
+    waveformPathLeft.startNewSubPath(processor.nodeField.getX(), processor.reverbNode.getYPosition());
+    waveformPathRight.startNewSubPath(processor.nodeField.getRight(), processor.reverbNode.getYPosition());
+}
+
+void SpacedAudioProcessorEditor::setWaveformPath(Graphics & g, int i)
+{
+    if(processor.nodeField.getX() + i > (processor.reverbNode.getXPosition() + processor.reverbNode.getRadius()))
+    {
+        
+        float yValue = 8 * sin(MathConstants<float>::twoPi * (processor.nodeField.getRight() - (processor.nodeField.getX() + i - processor.reverbNode.getXPosition() - processor.reverbNode.getRadius())) * 0.015) + processor.reverbNode.getYPosition();
+        
+        if(yValue > processor.nodeField.getBottom())
+        {
+            yValue = processor.nodeField.getBottom();
+        }
+        else if(yValue < processor.nodeField.getY())
+        {
+            yValue = processor.nodeField.getY();
+        }
+        
+        waveformPathRight.lineTo(processor.nodeField.getRight() - (processor.nodeField.getX() + i - processor.reverbNode.getXPosition() - processor.reverbNode.getRadius()), yValue);
+        
+    }
+    else if(processor.nodeField.getX() + i < processor.reverbNode.getXPosition() - processor.reverbNode.getRadius())
+    {
+        float yValue = 8 * sin(MathConstants<float>::twoPi * i * 0.015) + processor.reverbNode.getYPosition();
+        
+        if(yValue > processor.nodeField.getBottom())
+        {
+            yValue = processor.nodeField.getBottom();
+        }
+        else if(yValue < processor.nodeField.getY())
+        {
+            yValue = processor.nodeField.getY();
+        }
+        
+        waveformPathLeft.lineTo(processor.nodeField.getX() + i, yValue);
+        
+    }
 }
 
 void SpacedAudioProcessorEditor::drawNodeConnectorLines(Graphics& g, int iterator)
@@ -128,30 +155,36 @@ void SpacedAudioProcessorEditor::drawFinalNodeConnectorLine(Graphics &g)
 
 void SpacedAudioProcessorEditor::drawStaticUIElements(Graphics& g)
 {
-    Rectangle<float> titleFontArea = Rectangle<float>(0.0f, proportionOfHeight(0.666f), (float)getWidth(), proportionOfHeight(0.333f));
+    //Initialise Elements
+    Rectangle<float> titleFontArea = Rectangle<float>(15.0f, proportionOfHeight(0.75f), (float)getWidth(), proportionOfHeight(0.25f));
     
     Line<float> arrowLine1 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10, processor.nodeField.getRight() + 25, processor.nodeField.getY() + 10);
     Line<float> arrowLine2 = Line<float>(processor.nodeField.getRight() + 25, processor.nodeField.getY() + 10, processor.nodeField.getRight() + 25, processor.nodeField.getBottom() - 10);
-   
+    Line<float> arrowLine3 = Line<float>(processor.nodeField.getX() + 12, processor.nodeField.getBottom() + 25, processor.nodeField.getRight() - 10, processor.nodeField.getBottom() + 25);
+    Line<float> arrowLine4 = Line<float>(processor.nodeField.getRight() - 12, processor.nodeField.getBottom() + 25, processor.nodeField.getX() + 10, processor.nodeField.getBottom() + 25);
+    
+    //Draw Elements
     g.setColour(textColour);
     g.setFont(largeFont);
     g.drawText("space.", titleFontArea, Justification::centred);
     
     g.setFont(smallFont);
-    g.drawText("L", processor.roomSizeNodes[1].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
-    g.drawText("R", processor.roomSizeNodes[2].getXPosition() - (initialNodeWidth/4), processor.nodeField.getBottom(), 60, 60, Justification::left);
+    
     g.drawText("wet", processor.nodeField.getX(), processor.nodeField.getY(), processor.nodeField.getWidth(), 40, Justification::centred);
     g.drawText("dry", processor.nodeField.getX(), processor.nodeField.getBottom() - 40, processor.nodeField.getWidth(), 40, Justification::centred);
     
     g.drawArrow(arrowLine1, 1.0f, 4.0f, 10.0f);
     g.drawArrow(arrowLine2, 1.0f, 4.0f, 10.0f);
+    g.drawArrow(arrowLine3, 1.0f, 4.0f, 10.0f);
+    g.drawArrow(arrowLine4, 1.0f, 4.0f, 10.0f);
 
     g.addTransform(AffineTransform::rotation(-MathConstants<float>::halfPi, processor.nodeField.getRight(), processor.nodeField.getBottom()));
     
-    g.drawText("room size", processor.nodeField.getRight(), processor.nodeField.getBottom(), processor.nodeField.getHeight(), 100, Justification::centred);
+    g.drawText("room length", processor.nodeField.getRight(), processor.nodeField.getBottom(), processor.nodeField.getHeight(), 100, Justification::centred);
     
     g.addTransform(AffineTransform::rotation(MathConstants<float>::halfPi, processor.nodeField.getRight(), processor.nodeField.getBottom()));
     
+    g.drawText("room width", processor.nodeField.getX(), processor.nodeField.getBottom(), processor.nodeField.getWidth(), 100, Justification::centred);
 }
 
 void SpacedAudioProcessorEditor::drawBorderOnSelectedNode(Graphics& g, Node selectedNode)
@@ -174,9 +207,8 @@ void SpacedAudioProcessorEditor::mouseDown(const MouseEvent & m)
 {
     selectNodeForMovement(m);
     
-    waveform.clear();
-    waveform2.clear();
-    startPath = true;
+    previousMixValue = mix;
+    previousPanValue = pan;
     
     nodeFieldWidthOnMouseDown = processor.nodeField.getWidth();
     nodeFieldHeightOnMouseDown = processor.nodeField.getHeight();
@@ -184,6 +216,7 @@ void SpacedAudioProcessorEditor::mouseDown(const MouseEvent & m)
     nodeFieldYOnMouseDown = processor.nodeField.getY();
     nodeFieldRightOnMouseDown = processor.nodeField.getRight();
     nodeFieldBottomOnMouseDown = processor.nodeField.getBottom();
+    
     repaint();
 }
 
@@ -192,21 +225,22 @@ void SpacedAudioProcessorEditor::mouseDrag(const MouseEvent& m)
     if(m.mouseWasDraggedSinceMouseDown())
     {
         selectNodeForMovement(m);
-        waveform.clear();
-        waveform2.clear();
-        startPath = true;
+        waveformPathLeft.clear();
+        waveformPathRight.clear();
+
         if (selectedNode != nullptr)
         {
-            if (selectedNode == &processor.reverbNode)
+            if (selectedNode != &processor.reverbNode)
             {
-                updateNodePosition(m, *selectedNode);
+                updateRoomSizeUIElements(m);
             }
             else
-                updateRoomSizeUIElements(m);
+                updateNodePosition(m, *selectedNode);
         }
         repaint();
         updateRoomSizeParameter();
         updateMixParameter();
+        updateWidthParameter();
         updatePanParameter();
     }
 }
@@ -218,6 +252,7 @@ void SpacedAudioProcessorEditor::selectNodeForMovement(const MouseEvent &m)
 	{
 		selectedNode = &processor.reverbNode;
 	}
+    
 	else 
 	{
 		for (int i = 0; i < processor.roomSizeNodes.size(); i++)
@@ -246,30 +281,70 @@ void SpacedAudioProcessorEditor::updateNodePosition(const MouseEvent &m, Node &s
 
 void SpacedAudioProcessorEditor::updateRoomSizeUIElements(const MouseEvent &m)
 {
-    float newWidth = m.getDistanceFromDragStartX() + nodeFieldWidthOnMouseDown;
-    float newX = nodeFieldXOnMouseDown - m.getDistanceFromDragStartX()/2;
-    float newY = nodeFieldYOnMouseDown - m.getDistanceFromDragStartX()/2;
-    float newRight = nodeFieldRightOnMouseDown + m.getDistanceFromDragStartX()/2;
-    float newBottom = nodeFieldBottomOnMouseDown + m.getDistanceFromDragStartX()/2;
-
+    float newX {0}, newY {0}, newRight {0}, newBottom {0}, newWidth {0}, newHeight{0};
+    
+    setNewRoomSizeValues(newX, newY, newRight, newBottom, m);
+    
+    newWidth = newRight - newX;
+    newHeight = newBottom - newY;
+    
     if (newWidth < proportionOfWidth(0.5) && newWidth > proportionOfWidth(0.25))
     {
         processor.nodeField.setX(newX);
-        processor.nodeField.setY(newY);
         processor.nodeField.setRight(newRight);
-        processor.nodeField.setBottom(newBottom);
         
         processor.roomSizeNodes[0].setXPosition(processor.nodeField.getX());
-        processor.roomSizeNodes[0].setYPosition(processor.nodeField.getY());
         processor.roomSizeNodes[1].setXPosition(processor.nodeField.getX());
-        processor.roomSizeNodes[1].setYPosition(processor.nodeField.getBottom());
         processor.roomSizeNodes[2].setXPosition(processor.nodeField.getRight());
-        processor.roomSizeNodes[2].setYPosition(processor.nodeField.getBottom());
         processor.roomSizeNodes[3].setXPosition(processor.nodeField.getRight());
+    }
+    if(newHeight < proportionOfHeight(0.666) && newHeight > proportionOfHeight(0.25))
+    {
+        processor.nodeField.setY(newY);
+        processor.nodeField.setBottom(newBottom);
+        
+        processor.roomSizeNodes[0].setYPosition(processor.nodeField.getY());
+        processor.roomSizeNodes[1].setYPosition(processor.nodeField.getBottom());
+        processor.roomSizeNodes[2].setYPosition(processor.nodeField.getBottom());
         processor.roomSizeNodes[3].setYPosition(processor.nodeField.getY());
     }
+    
+    processor.reverbNode.setXPosition(jmap(previousPanValue, 0.0f, 1.0f, processor.nodeField.getX(), processor.nodeField.getRight()));
+    processor.reverbNode.setYPosition(jmap(previousMixValue, 0.0f, 1.0f, processor.nodeField.getBottom(), processor.nodeField.getY()));
 }
 
+void SpacedAudioProcessorEditor::setNewRoomSizeValues(float& x, float& y, float& right, float& bottom, const MouseEvent& m)
+{
+    if(selectedNode == &processor.roomSizeNodes[0])
+    {
+        x = nodeFieldXOnMouseDown + m.getDistanceFromDragStartX()/2;
+        y = nodeFieldYOnMouseDown + m.getDistanceFromDragStartY()/2;
+        right = nodeFieldRightOnMouseDown - m.getDistanceFromDragStartX()/2;
+        bottom = nodeFieldBottomOnMouseDown - m.getDistanceFromDragStartY()/2;
+    }
+    else if(selectedNode == &processor.roomSizeNodes[1])
+    {
+        x = nodeFieldXOnMouseDown + m.getDistanceFromDragStartX()/2;
+        y = nodeFieldYOnMouseDown - m.getDistanceFromDragStartY()/2;
+        right = nodeFieldRightOnMouseDown - m.getDistanceFromDragStartX()/2;
+        bottom = nodeFieldBottomOnMouseDown + m.getDistanceFromDragStartY()/2;
+    }
+    else if(selectedNode == &processor.roomSizeNodes[2])
+    {
+        x = nodeFieldXOnMouseDown - m.getDistanceFromDragStartX()/2;
+        y = nodeFieldYOnMouseDown - m.getDistanceFromDragStartY()/2;
+        right = nodeFieldRightOnMouseDown + m.getDistanceFromDragStartX()/2;
+        bottom = nodeFieldBottomOnMouseDown + m.getDistanceFromDragStartY()/2;
+    }
+    else if(selectedNode == &processor.roomSizeNodes[3])
+    {
+        x = nodeFieldXOnMouseDown - m.getDistanceFromDragStartX()/2;
+        y = nodeFieldYOnMouseDown + m.getDistanceFromDragStartY()/2;
+        right = nodeFieldRightOnMouseDown + m.getDistanceFromDragStartX()/2;
+        bottom = nodeFieldBottomOnMouseDown - m.getDistanceFromDragStartY()/2;
+    }
+    
+}
 void SpacedAudioProcessorEditor::keepNodeInField(float &newX, float &newY, Node selectedNode)
 {
 	if (newX > processor.nodeField.getRight())
@@ -286,7 +361,7 @@ void SpacedAudioProcessorEditor::keepNodeInField(float &newX, float &newY, Node 
 
 void SpacedAudioProcessorEditor::updateRoomSizeParameter()
 {
-	roomSize = jmap(processor.nodeField.getWidth(), (float)proportionOfWidth(0.25), (float)proportionOfWidth(0.5), 0.0f, 1.0f);
+	roomSize = jmap(processor.nodeField.getHeight(), (float)proportionOfHeight(0.25), (float)proportionOfHeight(0.666), 0.0f, 1.0f);
 	processor.parameters.getParameter("roomSize")->beginChangeGesture();
 	processor.parameters.getParameter("roomSize")->setValueNotifyingHost(roomSize);
 	processor.parameters.getParameter("roomSize")->endChangeGesture();
@@ -300,12 +375,20 @@ void SpacedAudioProcessorEditor::updateMixParameter()
 	processor.parameters.getParameter("mix")->endChangeGesture();
 }
 
+void SpacedAudioProcessorEditor::updateWidthParameter()
+{
+	width = jmap(processor.nodeField.getWidth(), (float)proportionOfWidth(0.25),(float)proportionOfWidth(0.5), 0.0f, 1.0f);
+	processor.parameters.getParameter("width")->beginChangeGesture();
+	processor.parameters.getParameter("width")->setValueNotifyingHost(width);
+	processor.parameters.getParameter("width")->endChangeGesture();
+}
+
 void SpacedAudioProcessorEditor::updatePanParameter()
 {
-	pan = jmap(processor.reverbNode.getXPosition(), processor.nodeField.getX(), processor.nodeField.getRight(), 0.0f, 1.0f);
-	processor.parameters.getParameter("pan")->beginChangeGesture();
-	processor.parameters.getParameter("pan")->setValueNotifyingHost(pan);
-	processor.parameters.getParameter("pan")->endChangeGesture();
+    pan = jmap(processor.reverbNode.getXPosition(), processor.nodeField.getX(),processor.nodeField.getRight(), 0.0f, 1.0f);
+    processor.parameters.getParameter("pan")->beginChangeGesture();
+    processor.parameters.getParameter("pan")->setValueNotifyingHost(pan);
+    processor.parameters.getParameter("pan")->endChangeGesture();
 }
 
 //==============================================================================
