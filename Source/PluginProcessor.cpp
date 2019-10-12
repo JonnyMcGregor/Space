@@ -112,6 +112,7 @@ void SpacedAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 	reverb.setParameters(reverbParameters);
     wetBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
     dryBuffer.setSize(getTotalNumInputChannels(), samplesPerBlock);
+    
     wetBuffer.clear();
     dryBuffer.clear();
 }
@@ -151,13 +152,20 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-
+    
+    //Some daws provide a different buffersize in prepareToPlay than in buffer.getNumSamples().
+    //Therefore, check and setSize() just in case...
+    if(wetBuffer.getNumSamples() != buffer.getNumSamples())
+    {
+        wetBuffer.setSize(totalNumInputChannels, buffer.getNumSamples());
+        dryBuffer.setSize(totalNumInputChannels, buffer.getNumSamples());
+    }
+    
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     {
         buffer.clear (i, 0, buffer.getNumSamples());
         wetBuffer.clear (i, 0, wetBuffer.getNumSamples());
         dryBuffer.clear (i, 0, wetBuffer.getNumSamples());
-
     }
     
 	reverbParameters.roomSize = *roomSize;
@@ -165,7 +173,7 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
 	reverbParameters.damping = *damping;
 	reverbParameters.dryLevel = 0.0;
 	reverbParameters.wetLevel = 1.0;
-    
+    reverbParameters.freezeMode = 0.1;
 	reverb.setParameters(reverbParameters);
     
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -190,7 +198,6 @@ void SpacedAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&
                 dryBuffer.setSample(channel, sample, dryBuffer.getSample(channel, sample) * sin(*pan*MathConstants<float>::halfPi));
             
             buffer.setSample(channel, sample, (dryBuffer.getSample(channel, sample) * (1 - *mix)) + (wetBuffer.getSample(channel, sample) * *mix));
-          
         }
     }
 }
