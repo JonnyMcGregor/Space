@@ -22,33 +22,20 @@ Space is a node-based reverb plugin.
 
 ### To install on MacOSX:
 
-1. Navigate to the "Files For Users" folder.
+1. Navigate to the "Installers" folder.
 
-2. Select the folder with the correct plugin format for your DAW (vst2, vst3, AU)
+2. Select the "MacOSX" folder 
 
-3. Select the MacOSX folder 
+3. Download and Run "Space.pkg" (You may have to enable the install if your security blocks it!)
 
-4. Copy the plugin file (either Space.vst, Space.vst3, or Space.component) into the corresponding plugin directory. This could look like:
-
-	Library/Audio/Plug-Ins/VST
-	Library/Audio/Plug-Ins/VST3
-	Library/Audio/Plug-Ins/Component
-
-5. Launch Space within chosen DAW :)
+4. Launch Space within chosen DAW :)
 
 ### To install on Windows:
 
-1. Navigate to the "Files For Users" folder.
+1. Navigate to the "Installers" folder.
 
-2. Select the folder with the correct plugin format for your DAW (vst2, vst3)
+2. Select the "Windows" folder 
 
-3. Select the Windows folder 
+3. Download and Run "Space.exe" and follow the instructions within the installer
 
-4. Copy the plugin file (either Space.dll or Space.vst3) into your plugin directory. This could look like:
-	
-	C:/ProgramFiles/VSTPlugins
-	C:/ProgramFiles/Steinberg/VSTPlugins
-	C:/ProgramFiles(86)/VSTPlugins
-	c:/ProgramFiles(86)/Steinberg/VSTPlugins
-
-5. Launch Space within chosen DAW :)
+4. Launch Space within chosen DAW :)
